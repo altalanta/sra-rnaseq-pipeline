@@ -1,0 +1,12 @@
+threads: 8
+output_dir: "results"
+adapter_trimming: true
+aligner: "salmon"
+genome:
+  fasta: "config/genome/reference.fa"
+  gtf: "config/genome/reference.gtf"
+  salmon_index: "config/genome/index"
+qc:
+  min_read_length: 30
+report:
+  make_pca: true

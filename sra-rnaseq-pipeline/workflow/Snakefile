@@ -1,0 +1,29 @@
+import pandas as pd
+
+configfile: "config/params.yaml"
+
+SAMPLES_DF = pd.read_csv("config/samples.csv")
+SRA_RUNS = SAMPLES_DF["sra_run"].tolist()
+SAMPLE_IDS = SAMPLES_DF["sample_id"].tolist()
+SAMPLE_TO_RUN = dict(zip(SAMPLES_DF["sample_id"], SAMPLES_DF["sra_run"], strict=True))
+
+OUTPUT_DIR = config.get("output_dir", "results")
+RAW_FASTQ_DIR = f"{OUTPUT_DIR}/raw_fastq"
+TRIMMED_DIR = f"{OUTPUT_DIR}/qc"
+QUANT_DIR = f"{OUTPUT_DIR}/quant"
+COUNTS_DIR = f"{OUTPUT_DIR}/counts"
+REPORT_DIR = f"{OUTPUT_DIR}/reports"
+
+include: "rules/download.smk"
+include: "rules/qc.smk"
+include: "rules/align_quant.smk"
+include: "rules/counts.smk"
+include: "rules/report.smk"
+
+
+rule all:
+    input:
+        expand(f"{TRIMMED_DIR}" + "/{sra_run}.trimmed.fastq.gz", sra_run=SRA_RUNS),
+        expand(f"{QUANT_DIR}" + "/{sample_id}/quant.sf", sample_id=SAMPLE_IDS),
+        f"{COUNTS_DIR}/expression_matrix.tsv",
+        f"{REPORT_DIR}/multiqc_report.html",
